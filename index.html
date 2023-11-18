@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="stylesheet"
+		href="style.css">
+</head>
+<body>
+    <header>
+        <div class="wall">
+            <div class="head">
+                <h1>  Поставщики тут </h1>
+            </div>
+        </div>
+    </header>
+
+    <div class="main">
+        <div class="btns">
+            <button class="btn" onclick="callByCategoria('all')"> Все</button>
+            <button class="btn" onclick="callByCategoria('1')"> Категория 1 </button>
+            <button class="btn" onclick="callByCategoria('2')"> Категория 2 </button>
+            <button class="btn" onclick="callByCategoria('3')"> Категория 3 </button>
+            <button class="btn" onclick="callByCategoria('4')"> Категория 4 </button>
+            <button class="btn" onclick="callByCategoria('5')"> Категория 5 </button>
+        </div>
+
+        <div class="searcher">
+            <input type="text" id="myfilter" placeholder="Поиск по тексту" title="Введите имя или номер класса">
+            <button id="myButton" onclick="findOnpage()"> Применить </button>
+        </div>
+
+        <div class="table">
+            <div class="table_header">
+                <h1> Рейтиг</h1>
+            </div>
+            <div class="table_body">
+                <div class="parametrs"> 
+                    <h2> Название</h2>
+                    <h2> значение</h2>
+                    <h2> Параметр</h2>
+                </div>
+
+                <div class="items" id="items">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+    
+    <script src="./index.js"></script>
+</body>
