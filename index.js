@@ -32,6 +32,41 @@ function call() {
     
     readServerString(url, function(err, response) {
         if (!err) {
+            current_items = 0;
+            json = response;
+            btnclick = [1]
+            objs = JSON.parse(response);
+            let params = document.getElementById('parametrs');
+            let items = document.getElementById("items");
+            index = 1;
+            createInn(params);
+            for (let i in objs.categires){
+                btnclick.push(1);
+                createButton(params, objs.categires[i], index);
+            }
+            
+            for (var i = 0; i < objs.data.length && i < (currentItems + loadCountItems); i++){
+                createItem(items, objs, i);
+            }
+            currentItems = i;
+        }
+    });
+}
+
+function compare(){
+    deleteAllItems();
+    deleteAllCategories();
+    let inn_1 = document.getElementById("request_1").value;
+    let inn_2 = document.getElementById("request_2").value;
+    
+    if (inn_1.length < 3 || inn_2.length < 3){
+        return;
+    }
+
+    let url = "?inn=inn_1";
+    
+    readServerString(url, function(err, response) {
+        if (!err) {
             json = response;
             current_items = 0;
 
@@ -39,16 +74,8 @@ function call() {
             objs = JSON.parse(response);
             let params = document.getElementById('parametrs');
             let items = document.getElementById("items");
-            
             index = 1;
-            
-            let innItem = document.createElement('div')
-            innItem.id = 'inn'
-            innItem.className = 'inn'
-            innItem.textContent = "Инн";
-            params.appendChild(innItem);
-
-            //createButton(params, 'ИНН', 0);
+            createInn(params);
             for (let i in objs.categires){
                 btnclick.push(1);
                 createButton(params, objs.categires[i], index);
@@ -61,6 +88,35 @@ function call() {
             currentItems = i;
         }
     });
+
+    url = "?inn=inn_2";
+
+    readServerString(url, function(err, response) {
+        if (!err) {
+            json = response;
+            current_items = 0;
+
+            btnclick = [1]
+            objs = JSON.parse(response);
+            let items = document.getElementById("items");
+            index = 1;
+            
+            for (var i = 0; i < objs.data.length && i < (currentItems + loadCountItems); i++){
+                createItem(items, objs, i);
+            }
+            currentItems = i;
+        }
+    });
+
+}
+
+function createInn(params){
+    let innItem = document.createElement('div')
+    innItem.id = 'inn'
+    innItem.className = 'inn'
+    innItem.textContent = "Инн";
+    params.appendChild(innItem);
+    params.appendChild(innItem);
 }
 
 function createButton(items, obj, index){
