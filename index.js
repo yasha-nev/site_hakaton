@@ -1,37 +1,173 @@
-var main_str;
+var btnclick = [];
+var json;
+var currentItems = 0;
+var loadCountItems = 2;
 
-function funonload() {
-    main_str = document.body.innerHTML
+function readServerString(url, callback) {
+    let request = new XMLHttpRequest();
+    request.onreadystatechange = function() {
+        if (request.readyState === 4) {
+            callback(undefined, request.responseText); 
+        } else {
+            callback(new Error(request.status)); 
+        }
+    }
+    request.open("get", url, true);
+    request.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=utf-8");
+    request.send();
+}
+
+function call() {
+    let input = document.getElementById("request").value;
+    
+    if (input == ""){
+        deleteAllCategories();
+        deleteAllItems();
+        return;
+    }
+
+    let url = 'kpgz/' + input;
+    deleteAllItems();
+    deleteAllCategories();
+    
+    readServerString(url, function(err, response) {
+        if (!err) {
+            json = response;
+            current_items = 0;
+
+            btnclick = [1]
+            objs = JSON.parse(response);
+            let params = document.getElementById('parametrs');
+            let items = document.getElementById("items");
+            
+            index = 1;
+            
+            let innItem = document.createElement('div')
+            innItem.id = 'inn'
+            innItem.className = 'inn'
+            innItem.textContent = "Инн";
+            params.appendChild(innItem);
+
+            //createButton(params, 'ИНН', 0);
+            for (let i in objs.categires){
+                btnclick.push(1);
+                createButton(params, objs.categires[i], index);
+                index++;
+            }
+            
+            for (var i = 0; i < objs.data.length && i < (currentItems + loadCountItems); i++){
+                createItem(items, objs, i);
+            }
+            currentItems = i;
+        }
+    });
+}
+
+function createButton(items, obj, index){
+    var item = document.createElement('button');
+    item.className = "btn";
+    item.addEventListener('click', function(){
+        sort(index);
+    });
+    
+    item.textContent = obj;
+    items.appendChild(item);
+}
+
+function createItem(items, obj, index){
+    let item = document.createElement('div');
+    item.className = "item";
+
+    let inn = document.createElement('h4');
+    let name = document.createElement('h4');
+    let value = document.createElement('h4');
+    let param = document.createElement('h4');
+
+    inn.textContent = obj.data[index].inn;
+    name.textContent = obj.data[index].name;
+    value.textContent = obj.data[index].value;
+    param.textContent = obj.data[index].params;
+    
+    item.appendChild(inn);
+    item.appendChild(name);
+    item.appendChild(value);
+    item.appendChild(param);
+    items.appendChild(item);
+}
+
+function addNextPages(){
+    objs = JSON.parse(json);
+    let items = document.getElementById("items");
+
+    if (current_items >= objs.data.length){
+        return;
+    }
+    
+    for (var i = currentItems; i < objs.data.length && i < (currentItems + loadCountItems); i++){
+        createItem(items, objs, i);
+    }
+
+    currentItems = i
 }
 
 function deleteAllItems(){
     quaery = document.querySelectorAll('.item')
+    for (let i = 0; i < quaery.length; i++){
+        quaery[i].remove();
+    }
+}
+
+function deleteAllCategories(){
+    inn = document.getElementById('inn')
+    if (inn){
+        inn.remove()
+    }
+
+    quaery = document.querySelectorAll('.btn');
     for (var i = 0; i < quaery.length; i++){
         quaery[i].remove();
     }
 }
 
-window.onload = funonload;
+function sort(index) {
+    let itemsList = document.querySelectorAll('.item');
+    let itemsArray = [];
+    let parent = itemsList[0].parentNode;
+    
+    for (let i = 0; i < itemsList.length; i++) {
+        itemsArray.push(itemsList[i]);
+        parent.removeChild(itemsList[i]);
+    }
 
-function readServerString(url, callback) {
-    var req = new XMLHttpRequest()
-    req.onreadystatechange = function() {
-        if (req.readyState === 4) {
-            callback(undefined, req.responseText); 
-        } else {
-            callback(new Error(req.status)); 
-        }
-    } 
+    itemsArray.sort(function(right, left){
+        leftChild = Array.from(left.children);
+        rightChild = Array.from(right.children);
 
-    req.open("POST", url, true);
-    req.setRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=utf-8");
-    req.send();
+        let rightNum = parseInt(rightChild[index].textContent);
+        let leftNum = parseInt(leftChild[index].textContent);
+
+        if (rightNum < leftNum) return -1 * btnclick[index];
+        if (rightNum > leftNum) return 1 * btnclick[index];
+        return 0;
+
+    }).forEach(function(node) {
+        parent.appendChild(node);
+    });
+
+    btnclick[index] *= -1;
 }
 
-function findOnpage(){
-    var input = document.getElementById("myfilter").value
-    var table = document.getElementById("items")
-    document.body.innerHTML = main_str
+/*
+window.onload = funonload;
+
+function funonload() {
+    mainBody = document.body.innerHTML;
+}
+
+ function findOnpage(){
+    var input = document.getElementById("myfilter").value;
+    var table = document.getElementById("items");
+    document.body.innerHTML = main_str;
     if (input.length < 3 || input == ' '){
         return
     }
@@ -46,67 +182,26 @@ function findOnpage(){
             }
         }
         if (!flag){
-                quaery[i].style.cssText = 'display: none'
+                quaery[i].style.cssText = 'display: none';
         }
     }
 }
+
 
 function callByCategoria(categoria){
     if (categoria == ""){
-        return
+        return;
     }
-    deleteAllItems()
+    deleteAllItems();
 
     var url = "/?categoria=" + categoria;
     readServerString(url, function(err, response){
-        var items = document.getElementById("items")
+        var items = document.getElementById("items");
         objs = JSON.parse(response);
         for (let i in objs) {
-            addItem(items, objs[i], objs.length - 1 != i)
+            addItem(items, objs[i], objs.length - 1 != i);
         }
-        funonload()
+        funonload();
     });
 }
-
-function call() {
-    var input = document.getElementById("myInput").value
-    if (input == ""){
-        return
-    }
-    var val = "/?search=" + input
-    
-    readServerString(val, function(err, response) {
-        if (!err) {
-            var items = document.getElementById("items")
-            objs = JSON.parse(response);
-            for (let i in objs) {
-                addItem(items, objs[i], objs.length - 1 != i)
-            }
-            funonload()
-        }
-    });
-}
-
-function addItem(items, obj, border){
-    console.log(items, obj)
-    var item = document.createElement('div')
-    item.className = "item"
-    item.style.cssText = 'margin-left: 10px; margin-right: 10px;display: flex;justify-content: space-between; align-items: center;' 
-    //'display: flex; justify-content: space-around;'
-
-    console.log(border)
-    if (border){
-        item.style.cssText += 'border-bottom: solid;'
-    }
-    var name = document.createElement('h4')
-    var value = document.createElement('h4')
-    var param = document.createElement('h4')
-    name.textContent = obj.name;
-    value.textContent = obj.value;
-    param.textContent = obj.params;
-    
-    item.appendChild(name)
-    item.appendChild(value)
-    item.appendChild(param)
-    items.appendChild(item)
-}
+ */
