@@ -26,7 +26,7 @@ function call() {
         return;
     }
 
-    let url = 'kpgz/' + input;
+    let url = '/filter/kpgz/' + input;
     deleteAllItems();
     deleteAllCategories();
     
@@ -34,17 +34,19 @@ function call() {
         if (!err) {
             current_items = 0;
             json = response;
-            btnclick = [1]
+            btnclick = [0]
             objs = JSON.parse(response);
             let params = document.getElementById('parametrs');
             let items = document.getElementById("items");
             index = 1;
+            p = ['fail', 'avg', 'active', 'total']
             createInn(params);
-            for (let i in objs.categires){
+            for (let i in p){
                 btnclick.push(1);
-                createButton(params, objs.categires[i], index);
+                createButton(params, p[i], index);
+                index++;
             }
-            
+
             for (var i = 0; i < objs.data.length && i < (currentItems + loadCountItems); i++){
                 createItem(items, objs, i);
             }
@@ -67,21 +69,23 @@ function compare(){
     
     readServerString(url, function(err, response) {
         if (!err) {
-            json = response;
             current_items = 0;
-
-            btnclick = [1]
+            json = response;
+            
+            btnclick = [0]
             objs = JSON.parse(response);
             let params = document.getElementById('parametrs');
             let items = document.getElementById("items");
             index = 1;
+            p = ['fail', 'avg', 'active', 'total']
+
             createInn(params);
-            for (let i in objs.categires){
+            for (let i in p){
                 btnclick.push(1);
-                createButton(params, objs.categires[i], index);
+                createButton(params, p[i], index);
                 index++;
             }
-            
+
             for (var i = 0; i < objs.data.length && i < (currentItems + loadCountItems); i++){
                 createItem(items, objs, i);
             }
@@ -94,13 +98,8 @@ function compare(){
     readServerString(url, function(err, response) {
         if (!err) {
             json = response;
-            current_items = 0;
-
-            btnclick = [1]
-            objs = JSON.parse(response);
             let items = document.getElementById("items");
-            index = 1;
-            
+
             for (var i = 0; i < objs.data.length && i < (currentItems + loadCountItems); i++){
                 createItem(items, objs, i);
             }
@@ -135,19 +134,22 @@ function createItem(items, obj, index){
     item.className = "item";
 
     let inn = document.createElement('h4');
-    let name = document.createElement('h4');
-    let value = document.createElement('h4');
-    let param = document.createElement('h4');
+    let failed_dedlines = document.createElement('h4');
+    let avg_udp_contract = document.createElement('h4');
+    let activity = document.createElement('h4');
+    let total = document.createElement('h4');
 
     inn.textContent = obj.data[index].inn;
-    name.textContent = obj.data[index].name;
-    value.textContent = obj.data[index].value;
-    param.textContent = obj.data[index].params;
-    
+    failed_dedlines.textContent = obj.data[index].failed_dedlines;
+    avg_udp_contract.textContent = obj.data[index].avg_udp_contract;
+    activity.textContent = obj.data[index].activity;
+    total.textContent = obj.data[index].total;
+
     item.appendChild(inn);
-    item.appendChild(name);
-    item.appendChild(value);
-    item.appendChild(param);
+    item.appendChild(failed_dedlines);
+    item.appendChild(avg_udp_contract);
+    item.appendChild(activity);
+    item.appendChild(total);
     items.appendChild(item);
 }
 
@@ -174,11 +176,6 @@ function deleteAllItems(){
 }
 
 function deleteAllCategories(){
-    inn = document.getElementById('inn')
-    if (inn){
-        inn.remove()
-    }
-
     quaery = document.querySelectorAll('.btn');
     for (var i = 0; i < quaery.length; i++){
         quaery[i].remove();
@@ -186,78 +183,63 @@ function deleteAllCategories(){
 }
 
 function sort(index) {
-    let itemsList = document.querySelectorAll('.item');
-    let itemsArray = [];
-    let parent = itemsList[0].parentNode;
+    deleteAllItems();
+    let countItems = 0
     
-    for (let i = 0; i < itemsList.length; i++) {
-        itemsArray.push(itemsList[i]);
-        parent.removeChild(itemsList[i]);
+    new_json = []
+    data = JSON.parse(json)
+    let num_i;
+    let inx = 0;
+    for (var i in data.data[1]){
+        if (inx === index){
+            num_i = i;
+            break;
+        }
+        inx++;
     }
+    let items = document.getElementById('items');
 
-    itemsArray.sort(function(right, left){
-        leftChild = Array.from(left.children);
-        rightChild = Array.from(right.children);
-
-        let rightNum = parseInt(rightChild[index].textContent);
-        let leftNum = parseInt(leftChild[index].textContent);
+    data.data.sort( function(right, left){
+        let rightNum = parseFloat(right[num_i]);
+        let leftNum = parseFloat(left[num_i]);
 
         if (rightNum < leftNum) return -1 * btnclick[index];
+        
         if (rightNum > leftNum) return 1 * btnclick[index];
+        
         return 0;
 
     }).forEach(function(node) {
-        parent.appendChild(node);
+        if (countItems < currentItems){
+            sortCreateItem(items, node);
+        }
+        countItems++;
     });
 
     btnclick[index] *= -1;
 }
 
-/*
-window.onload = funonload;
+function sortCreateItem(items, obj){
 
-function funonload() {
-    mainBody = document.body.innerHTML;
+    let item = document.createElement('div');
+    item.className = "item";
+
+    let inn = document.createElement('h4');
+    let failed_dedlines = document.createElement('h4');
+    let avg_udp_contract = document.createElement('h4');
+    let activity = document.createElement('h4');
+    let total = document.createElement('h4');
+
+    inn.textContent = obj.inn;
+    failed_dedlines.textContent = obj.failed_dedlines;
+    avg_udp_contract.textContent = obj.avg_udp_contract;
+    activity.textContent = obj.activity;
+    total.textContent = obj.total;
+
+    item.appendChild(inn);
+    item.appendChild(failed_dedlines);
+    item.appendChild(avg_udp_contract);
+    item.appendChild(activity);
+    item.appendChild(total);
+    items.appendChild(item);
 }
-
- function findOnpage(){
-    var input = document.getElementById("myfilter").value;
-    var table = document.getElementById("items");
-    document.body.innerHTML = main_str;
-    if (input.length < 3 || input == ' '){
-        return
-    }
-    quaery = document.querySelectorAll(".item")
-    let reg = new RegExp(input);
-    for (var i = 0; i < quaery.length; i++) {
-        var flag = false;
-        for (var child of quaery[i].children){                    
-            if (String(child.textContent).search(reg) >= 0){
-                flag = true;
-                break;
-            }
-        }
-        if (!flag){
-                quaery[i].style.cssText = 'display: none';
-        }
-    }
-}
-
-
-function callByCategoria(categoria){
-    if (categoria == ""){
-        return;
-    }
-    deleteAllItems();
-
-    var url = "/?categoria=" + categoria;
-    readServerString(url, function(err, response){
-        var items = document.getElementById("items");
-        objs = JSON.parse(response);
-        for (let i in objs) {
-            addItem(items, objs[i], objs.length - 1 != i);
-        }
-        funonload();
-    });
-}
- */
