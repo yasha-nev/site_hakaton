@@ -34,18 +34,22 @@ function call() {
         if (!err) {
             current_items = 0;
             json = response;
-            btnclick = [0]
+            
             objs = JSON.parse(response);
-            let params = document.getElementById('parametrs');
+            
             let items = document.getElementById("items");
+
+            btnclick = [0]
+            let params = document.getElementById('parametrs');
             index = 1;
-            p = ['fail', 'avg', 'active', 'total']
+            p = ['Процент провальных сроков', 'Средний UPD на контракт', 'Активность', 'Рейтинг']
             createInn(params);
             for (let i in p){
                 btnclick.push(1);
                 createButton(params, p[i], index);
                 index++;
             }
+
 
             for (var i = 0; i < objs.data.length && i < (currentItems + loadCountItems); i++){
                 createItem(items, objs, i);
@@ -58,26 +62,24 @@ function call() {
 function compare(){
     deleteAllItems();
     deleteAllCategories();
-    let inn_1 = document.getElementById("request_1").value;
-    let inn_2 = document.getElementById("request_2").value;
+    let inn = document.getElementById("request_1").value;
     
-    if (inn_1.length < 3 || inn_2.length < 3){
+    if (inn.length < 3){
         return;
     }
-
-    let url = "?inn=inn_1";
+    let url = "filter/inn/" + inn;
     
     readServerString(url, function(err, response) {
         if (!err) {
             current_items = 0;
             json = response;
             
-            btnclick = [0]
             objs = JSON.parse(response);
-            let params = document.getElementById('parametrs');
             let items = document.getElementById("items");
+            let params = document.getElementById('parametrs');
+            btnclick = [0]
             index = 1;
-            p = ['fail', 'avg', 'active', 'total']
+            p = ['Процент провальных сроков', 'Средний UPD на контракт', 'Активность', 'Рейтинг']
 
             createInn(params);
             for (let i in p){
@@ -92,21 +94,6 @@ function compare(){
             currentItems = i;
         }
     });
-
-    url = "?inn=inn_2";
-
-    readServerString(url, function(err, response) {
-        if (!err) {
-            json = response;
-            let items = document.getElementById("items");
-
-            for (var i = 0; i < objs.data.length && i < (currentItems + loadCountItems); i++){
-                createItem(items, objs, i);
-            }
-            currentItems = i;
-        }
-    });
-
 }
 
 function createInn(params){
@@ -176,6 +163,11 @@ function deleteAllItems(){
 }
 
 function deleteAllCategories(){
+    inn = document.getElementById("inn")
+    if(inn){
+        inn.remove();
+    }
+
     quaery = document.querySelectorAll('.btn');
     for (var i = 0; i < quaery.length; i++){
         quaery[i].remove();
